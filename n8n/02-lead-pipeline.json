@@ -1,5 +1,5 @@
 {
-  "name": "Heritage - Lead Pipeline (instant phone alert)",
+  "name": "Heritage - Lead Pipeline (phone alert + calendar)",
   "nodes": [
     {
       "parameters": {
@@ -15,8 +15,19 @@
       "name": "Webhook - lead",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [240, 300],
+      "position": [220, 320],
       "webhookId": "carpet-lead-webhook"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const b=($input.first().json.body)||{};const name=(b.name||'').toString().trim()||'Unknown';const phone=(b.phone||'').toString().trim()||'?';const town=(b.address||'').toString().trim()||'?';const service=(b.service||'').toString().trim()||'?';const when=(b.timing||b.preferred_day||'').toString().trim();const notes=(b.notes||'').toString().trim()||'-';const source=(b.source||'website').toString();const days={sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6};const now=new Date();function nextDow(t){for(let i=1;i<=14;i++){const d=new Date(now);d.setDate(now.getDate()+i);if(d.getDay()===t)return d;}return now;}let target=null;const w=when.toLowerCase();for(const k in days){if(w.indexOf(k)>=0){target=nextDow(days[k]);break;}}if(!target){if(w.indexOf('next week')>=0)target=nextDow(1);else if(w.indexOf('tomorrow')>=0){target=new Date(now);target.setDate(now.getDate()+1);}else if(w.indexOf('today')>=0){target=new Date(now);}else{target=new Date(now);target.setDate(now.getDate()+1);}}let g=target.getDay();if(g===5)target.setDate(target.getDate()+3);else if(g===6)target.setDate(target.getDate()+2);else if(g===0)target.setDate(target.getDate()+1);const pad=function(n){return(''+n).padStart(2,'0');};const date=target.getFullYear()+'-'+pad(target.getMonth()+1)+'-'+pad(target.getDate());const start=date+'T09:00:00';const end=date+'T10:00:00';const summary='HOLD (confirm time): '+name+' - '+service+' ('+town+')';const description=['BOOKING REQUEST ('+source+')','Name: '+name,'Phone: '+phone,'Town: '+town,'Service: '+service,'Preferred: '+(when||'(none given)'),'Notes: '+notes,'','Placeholder hold - call to confirm the exact time, then move this event.'].join('\\n');const alert=name+'  |  '+phone+'  |  '+town+'  |  '+service+'  |  '+(when||'no pref')+'  |  '+notes;return [{json:{name:name,phone:phone,town:town,service:service,when:when,notes:notes,source:source,date:date,start:start,end:end,summary:summary,description:description,alert:alert}}];"
+      },
+      "id": "f6666666-6666-4666-8666-666666666666",
+      "name": "Build booking",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 320]
     },
     {
       "parameters": {
@@ -25,19 +36,44 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { topic: 'heritage-leads-CHANGE-ME', title: 'New carpet lead', priority: 4, tags: ['moneybag'], message: 'Name: ' + ($json.body.name || '?') + '  |  Phone: ' + ($json.body.phone || '?') + '  |  Town: ' + ($json.body.address || '?') + '  |  Service: ' + ($json.body.service || '?') + '  |  When: ' + ($json.body.timing || '?') + '  |  Notes: ' + ($json.body.notes || '-') } }}",
+        "jsonBody": "={{ { topic: 'heritage-leads-CHANGE-ME', title: 'New carpet lead', priority: 4, tags: ['moneybag'], message: $('Build booking').item.json.alert } }}",
         "options": {}
       },
       "id": "e5555555-5555-4555-8555-555555555555",
       "name": "Push to phone (ntfy)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [520, 300]
+      "position": [660, 320]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleCalendarOAuth2Api",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { summary: $('Build booking').item.json.summary, description: $('Build booking').item.json.description, start: { dateTime: $('Build booking').item.json.start, timeZone: 'America/Chicago' }, end: { dateTime: $('Build booking').item.json.end, timeZone: 'America/Chicago' } } }}",
+        "options": {}
+      },
+      "id": "a7777777-7777-4777-8777-777777777777",
+      "name": "Create calendar HOLD",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [880, 320],
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
     "Webhook - lead": {
+      "main": [[{ "node": "Build booking", "type": "main", "index": 0 }]]
+    },
+    "Build booking": {
       "main": [[{ "node": "Push to phone (ntfy)", "type": "main", "index": 0 }]]
+    },
+    "Push to phone (ntfy)": {
+      "main": [[{ "node": "Create calendar HOLD", "type": "main", "index": 0 }]]
     }
   },
   "settings": {

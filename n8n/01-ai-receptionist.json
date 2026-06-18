@@ -1,5 +1,5 @@
 {
-  "name": "Heritage - AI Receptionist (chat)",
+  "name": "Heritage - AI Receptionist (chat + booking)",
   "nodes": [
     {
       "parameters": {
@@ -14,7 +14,7 @@
       "name": "Webhook - chat",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [240, 300],
+      "position": [180, 320],
       "webhookId": "carpet-chat-webhook"
     },
     {
@@ -26,14 +26,82 @@
         "sendBody": true,
         "contentType": "json",
         "specifyBody": "json",
-        "jsonBody": "={{ { model: 'gpt-4o-mini', max_tokens: 500, temperature: 0.5, messages: [{ role: 'system', content: ($json.body.system || 'You are the friendly receptionist for Heritage Carpet Care. Keep replies to 2-4 sentences.') }].concat($json.body.messages || []) } }}",
+        "jsonBody": "={{ { model: 'gpt-4o-mini', max_tokens: 500, temperature: 0.5, tools: [ { type: 'function', function: { name: 'book_appointment', description: 'Call this once you have collected the customer name, phone, town, the service they want, and a preferred day (Monday-Thursday). It records the booking request; the owner confirms the exact time by text.', parameters: { type: 'object', properties: { name: { type: 'string' }, phone: { type: 'string' }, town: { type: 'string' }, service: { type: 'string' }, preferred_day: { type: 'string' }, notes: { type: 'string' } }, required: ['name','phone','town','service','preferred_day'] } } } ], messages: [ { role: 'system', content: ($json.body.system || 'You are the friendly receptionist for Heritage Carpet Care. Keep replies to 2-4 sentences.') } ].concat($json.body.messages || []) } }}",
         "options": {}
       },
       "id": "b2222222-2222-4222-8222-222222222222",
       "name": "OpenAI - chat completion",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [520, 300]
+      "position": [400, 320]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "cond-tool-call",
+              "leftValue": "={{ ($json.choices[0].message.tool_calls || []).length }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b8888888-8888-4888-8888-888888888888",
+      "name": "Did it book?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [620, 320]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const m=$input.first().json.choices[0].message;const tc=(m.tool_calls&&m.tool_calls[0])?m.tool_calls[0]:null;let a={};try{a=tc?JSON.parse(tc.function.arguments||'{}'):{};}catch(e){a={};}const name=a.name||'there';const phone=a.phone||'';const reply='Perfect, '+name+' - I have recorded your booking request'+(a.preferred_day?(' for '+a.preferred_day):'')+'. The owner will text '+(phone||'you')+' shortly to confirm the exact time. Anything else I can help with?';return [{json:{name:a.name||'',phone:phone,town:a.town||'',service:a.service||'',preferred_day:a.preferred_day||'',notes:a.notes||'',reply:reply}}];"
+      },
+      "id": "c9999999-9999-4999-8999-999999999999",
+      "name": "Prepare booking",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [840, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-n8n.onrender.com/webhook/carpet-lead",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { name: $json.name, phone: $json.phone, address: $json.town, service: $json.service, timing: $json.preferred_day, notes: $json.notes, source: 'chat' } }}",
+        "options": {}
+      },
+      "id": "da111111-1111-4111-8111-aaaaaaaaaaaa",
+      "name": "Forward to Lead Pipeline",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1060, 200],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { reply: $('Prepare booking').item.json.reply } }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin", "value": "*" }
+            ]
+          }
+        }
+      },
+      "id": "db222222-2222-4222-8222-bbbbbbbbbbbb",
+      "name": "Respond (booked)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1280, 200]
     },
     {
       "parameters": {
@@ -47,11 +115,11 @@
           }
         }
       },
-      "id": "c3333333-3333-4333-8333-333333333333",
-      "name": "Respond to Webhook",
+      "id": "dc333333-3333-4333-8333-cccccccccccc",
+      "name": "Respond (chat)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [800, 300]
+      "position": [840, 440]
     }
   ],
   "connections": {
@@ -59,7 +127,19 @@
       "main": [[{ "node": "OpenAI - chat completion", "type": "main", "index": 0 }]]
     },
     "OpenAI - chat completion": {
-      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Did it book?", "type": "main", "index": 0 }]]
+    },
+    "Did it book?": {
+      "main": [
+        [{ "node": "Prepare booking", "type": "main", "index": 0 }],
+        [{ "node": "Respond (chat)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Prepare booking": {
+      "main": [[{ "node": "Forward to Lead Pipeline", "type": "main", "index": 0 }]]
+    },
+    "Forward to Lead Pipeline": {
+      "main": [[{ "node": "Respond (booked)", "type": "main", "index": 0 }]]
     }
   },
   "settings": {

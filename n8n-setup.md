@@ -50,6 +50,11 @@ bottom — it's thousands of conversations).
 > JSON**, then paste the expression from the `jsonBody` field in the file. (It's preconfigured; this is
 > just a fallback if your n8n version resets it on import.)
 
+> 📅 **This workflow can also book.** It carries a `book_appointment` tool: once the bot has the visitor's
+> name, phone, town, service, and a preferred day, it fires that booking into your Lead Pipeline (phone
+> alert + calendar hold). To enable it, paste your **carpet-lead** URL into the **"Forward to Lead
+> Pipeline"** node — do that after Step 2 below.
+
 ### Wire it into the website
 Open `index.html`, find the `N8N` block near the top of the `<script>`, and paste your URL:
 
@@ -81,12 +86,40 @@ This makes your phone buzz within seconds of a form submit.
   leadWebhook: 'https://n8n-xxxx.onrender.com/webhook/carpet-lead',
 ```
 
-Now every quote request emails you (via Web3Forms — set that key in the form too) **and** pushes a
-one-line alert to your phone: `Name | Phone | Town | Service | When | Notes`. Tap it, call them back.
+Now every quote request emails you (via Web3Forms — set that key in the form too), pushes a one-line alert
+to your phone: `Name | Phone | Town | Service | When | Notes`, **and** drops a HOLD on your Google Calendar
+for the requested day (next step).
 
-> **Optional — log every lead to a Google Sheet:** add a **Google Sheets ▸ Append Row** node after the
-> webhook, connect your Google account, and map `{{$json.body.name}}`, `{{$json.body.phone}}`, etc. Now
-> you have a free CRM you can sort and follow up from.
+### Connect Google Calendar (so bookings land on your calendar)
+The pipeline parses the requested day and creates a placeholder **"HOLD (confirm time)"** event at 9 AM —
+name, phone, service, notes all in the description. You call to confirm, then drag it to the real time.
+
+6. **Create a Google Calendar OAuth credential.** Self-hosted n8n needs your own Google app (~10 min, free):
+   - In [Google Cloud Console](https://console.cloud.google.com): new project → **APIs & Services ▸ Library
+     ▸ enable "Google Calendar API"**.
+   - **OAuth consent screen**: type *External*, then add your own email as a **Test user**.
+   - **Credentials ▸ Create Credentials ▸ OAuth client ID ▸ Web application**. Leave it open while you do
+     the next bullet — you need n8n's redirect URI.
+   - In n8n, open the **"Create calendar HOLD"** node ▸ **Credential ▸ Create New ▸ Google Calendar OAuth2
+     API**. n8n shows an **OAuth Redirect URL** (like
+     `https://n8n-xxxx.onrender.com/rest/oauth2-credential/callback`) — paste it into the Google **Authorized
+     redirect URIs**, save, and copy the **Client ID + Secret** back into n8n. Click **Sign in with Google**,
+     allow access. **Save**, toggle **Active**.
+7. Prefer a dedicated calendar (not your personal one)? Make a *Heritage Bookings* calendar in Google
+   Calendar, copy its **Calendar ID**, and in the node's URL swap `primary` for that ID. Default `primary`
+   = your main calendar.
+
+### Let the chatbot book too
+Chat bookings ride the same rails. In the **AI Receptionist** workflow, open **"Forward to Lead Pipeline"**
+and set its URL to your **carpet-lead** Production URL (from step 5). Now a booking captured in conversation
+also pings your phone and drops a calendar hold. **Save** both workflows.
+
+> The calendar step is **best-effort** — it runs *after* the phone alert and is set to *continue on fail*,
+> so even if Google auth hiccups you never lose the lead. If a hold ever lands at the wrong hour, open the
+> node and confirm the time zone reads `America/Chicago`.
+
+> **Optional — log every lead to a Google Sheet:** add a **Google Sheets ▸ Append Row** node after
+> *Build booking* and map `{{$json.name}}`, `{{$json.phone}}`, `{{$json.town}}`, etc. for a free CRM.
 
 ---
 
@@ -103,7 +136,9 @@ one-line alert to your phone: `Name | Phone | Town | Service | When | Notes`. Ta
 ## 4. Test the whole loop
 
 - **Chat:** open the site, ask "how much for 4 rooms?" → you should get a real answer in a sentence or two.
-- **Lead:** submit the quote form → your phone should buzz via ntfy within seconds.
+- **Booking:** in chat, give a name, phone, town, service, and say "book me Tuesday" → you should get a
+  confirmation, a phone buzz, and a **HOLD event on Tuesday** in Google Calendar.
+- **Lead:** submit the quote form → phone buzz via ntfy + a calendar HOLD within seconds.
 - If chat hangs ~40s the first time, that's Render waking up — fix next.
 
 ---
