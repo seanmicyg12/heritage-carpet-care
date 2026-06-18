@@ -1,0 +1,47 @@
+{
+  "name": "Heritage - Lead Pipeline (instant phone alert)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "carpet-lead",
+        "responseMode": "onReceived",
+        "responseCode": 200,
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "d4444444-4444-4444-8444-444444444444",
+      "name": "Webhook - lead",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "carpet-lead-webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ntfy.sh",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ { topic: 'heritage-leads-CHANGE-ME', title: 'New carpet lead', priority: 4, tags: ['moneybag'], message: 'Name: ' + ($json.body.name || '?') + '  |  Phone: ' + ($json.body.phone || '?') + '  |  Town: ' + ($json.body.address || '?') + '  |  Service: ' + ($json.body.service || '?') + '  |  When: ' + ($json.body.timing || '?') + '  |  Notes: ' + ($json.body.notes || '-') } }}",
+        "options": {}
+      },
+      "id": "e5555555-5555-4555-8555-555555555555",
+      "name": "Push to phone (ntfy)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - lead": {
+      "main": [[{ "node": "Push to phone (ntfy)", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

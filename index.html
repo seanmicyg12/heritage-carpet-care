@@ -464,10 +464,10 @@
      Full workflow recipes + payload schemas are in n8n-setup.md
      ===================================================================== */
   const N8N = {
-    leadWebhook: '',   // POST  -> receives every form lead. e.g. https://YOUR-n8n/webhook/lead
-    chatWebhook: '',   // POST  -> AI receptionist. Gets {system,messages,sessionId}, returns {reply}
+    // EDIT: paste each workflow's n8n "Production URL" here (full steps in n8n-setup.md)
+    leadWebhook: '',   // WF "Lead Pipeline"    e.g. https://n8n-xxxx.onrender.com/webhook/carpet-lead
+    chatWebhook: '',   // WF "AI Receptionist"  e.g. https://n8n-xxxx.onrender.com/webhook/carpet-chat
   };
-  const CHAT_ENDPOINT = 'https://api.anthropic.com/v1/messages'; // used only when chatWebhook is empty (Claude preview)
   const PHONE = '(312) 555-0199';                                 // EDIT: your number (also update the tel: links above)
   const sessionId = 'web_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 
@@ -500,27 +500,30 @@
     ba.addEventListener('click',e=>set(e.clientX));
   })();
 
-  /* ----- quote form (Web3Forms) ----- */
+  /* ----- quote form: emails you via Web3Forms AND pushes a structured lead to n8n ----- */
   document.getElementById('quoteForm').addEventListener('submit', async function(e){
     e.preventDefault();
     const btn=this.querySelector('button[type=submit]'); btn.textContent='Sending...'; btn.disabled=true;
+    const fd=new FormData(this);
+    postLead(Object.fromEntries(fd.entries()));   // fire-and-forget -> n8n lead pipeline (instant phone alert)
     try{
       const res=await fetch('https://api.web3forms.com/submit',{
-        method:'POST',headers:{'Accept':'application/json'},body:new FormData(this)
+        method:'POST',headers:{'Accept':'application/json'},body:fd
       });
       if(res.ok){ this.style.display='none'; document.getElementById('formOk').style.display='block'; }
       else throw new Error();
     }catch(err){
       btn.textContent='Send for my quote'; btn.disabled=false;
-      alert('Something went wrong. Please text or call (312) 555-0199 and we will sort it out.');
+      alert('Something went wrong. Please text or call '+PHONE+' and we will sort it out.');
     }
   });
 
-  /* ----- AI chat widget -----
-     In the Claude artifact preview this calls the Anthropic API directly and works as a live demo.
-     WHEN YOU DEPLOY: browsers cannot safely hold an API key, so point CHAT_ENDPOINT at your own
-     tiny serverless function (Cloudflare Worker / Vercel function) that adds the key and forwards
-     to api.anthropic.com. Swap the fetch URL below for your endpoint and you are done.
+  /* ----- AI chat widget (the "receptionist") -----
+     The browser NEVER holds an API key. It POSTs {system, messages, sessionId} to your n8n
+     "AI Receptionist" webhook (N8N.chatWebhook, set at the top of this script). n8n adds your
+     OpenAI key server-side, calls the model, and returns {reply}. Until that URL is set, the
+     widget gracefully tells visitors to text you. Import n8n/01-ai-receptionist.json (see
+     n8n-setup.md). The SYSTEM_PROMPT below is the bot's brain — edit it freely.
   */
   const SYSTEM_PROMPT = `You are the friendly virtual assistant for Heritage Carpet Care, a premium carpet, rug, and upholstery cleaning company serving the affluent west suburbs of Chicago: Hinsdale, Oak Brook, Glen Ellyn, Clarendon Hills, Burr Ridge, Western Springs, Wheaton, Naperville, and Downers Grove. (We do not currently serve Elmhurst.)
 Goals, in order: 1) answer questions clearly and briefly, 2) give ballpark pricing, 3) capture the lead (name, phone, address/town, what needs cleaning) and tell them the owner will text a firm quote.
@@ -529,7 +532,6 @@ Dry time is 2-4 hours. Hot-water extraction, pet and kid safe, fully insured.
 Scheduling: we book Monday through Thursday only. When scheduling comes up, offer Monday or Tuesday first to keep the week tight, then Wednesday or Thursday if those are full. Never offer Friday, Saturday, or Sunday.
 Keep replies to 2-4 sentences. Never invent exact appointment times; say the owner confirms the slot. If they share contact details, thank them and say the owner will text a firm quote and a Monday or Tuesday time shortly.`;
 
-  const CHAT_ENDPOINT = 'https://api.anthropic.com/v1/messages'; // see deploy note above
   let history = [];
   let chatUserClosed = false;
 
@@ -563,18 +565,25 @@ Keep replies to 2-4 sentences. Never invent exact appointment times; say the own
     const inp=document.getElementById('chatInput'); const text=inp.value.trim(); if(!text)return;
     addMsg('me',text); inp.value=''; history.push({role:'user',content:text});
     const t=addMsg('bot','...'); t.classList.add('typing');
+    // Receptionist not wired up yet? Don't leave them hanging — send them to the phone.
+    if(!N8N.chatWebhook){
+      t.classList.remove('typing');
+      t.textContent="Thanks! The fastest way to a firm quote is to text us at "+PHONE+" — we reply quickly.";
+      history.push({role:'assistant',content:t.textContent});
+      return;
+    }
     try{
-      const res=await fetch(CHAT_ENDPOINT,{
+      const res=await fetch(N8N.chatWebhook,{
         method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:SYSTEM_PROMPT,messages:history})
+        body:JSON.stringify({system:SYSTEM_PROMPT,messages:history,sessionId})
       });
       const data=await res.json();
-      const reply=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim()
-        || "Easiest is to text us at (312) 555-0199 and we'll get you a quote fast.";
+      const reply=(data.reply||'').trim()
+        || ("Easiest is to text us at "+PHONE+" and we'll get you a quote fast.");
       t.classList.remove('typing'); t.textContent=reply; history.push({role:'assistant',content:reply});
     }catch(err){
       t.classList.remove('typing');
-      t.textContent="I'm having trouble connecting. Please text or call (312) 555-0199 and we'll help right away.";
+      t.textContent="I'm having trouble connecting. Please text or call "+PHONE+" and we'll help right away.";
     }
   }
 </script>
