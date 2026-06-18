@@ -1,0 +1,582 @@
+<!--
+  HERITAGE CARPET CARE  -  single-file website
+  Serving Chicago's affluent west suburbs: Hinsdale, Oak Brook, Glen Ellyn, Clarendon Hills,
+  Burr Ridge, Western Springs, Wheaton, Naperville, Downers Grove (NOT Elmhurst, by design)
+
+  HOW TO PUT THIS LIVE FOR FREE (5 min):
+   1. Go to app.netlify.com/drop  (or pages.cloudflare.com)
+   2. Drag this index.html file onto the page. Done. You get a live URL.
+   3. Buy a domain later ($12/yr at namecheap) and point it there.
+
+  THINGS TO SWAP (search for "EDIT:"):
+   - Phone number (appears in several places)
+   - Web3Forms key for the quote form (free at web3forms.com)
+   - The AI chat widget endpoint when you deploy (see comment in <script>)
+   - Business name / colors if you rebrand
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heritage Carpet Care | West Suburban Carpet Cleaning — Hinsdale, Oak Brook, Glen Ellyn</title>
+<meta name="description" content="Premium carpet and rug cleaning across Chicago's west suburbs: Hinsdale, Oak Brook, Glen Ellyn, Clarendon Hills, Burr Ridge and more. Insured, same-week, carpets dry in hours. Get a fast quote.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16243a;        /* deep navy ink, body text + dark sections */
+    --pine:#21395c;       /* brand navy (kept var name) */
+    --pine-deep:#152741;
+    --bone:#f4efe3;       /* warm cream paper background */
+    --bone-2:#e7ddca;
+    --brass:#b98a3c;      /* aged brass/gold, signature accent, used sparingly */
+    --fresh:#9c3b2c;      /* muted barn-red for CTAs (kept var name) */
+    --fresh-press:#7f2f22;
+    --line:rgba(22,36,58,.14);
+    --shadow:0 1px 2px rgba(22,36,58,.06), 0 12px 30px rgba(22,36,58,.12);
+    --r:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);background:var(--bone);
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Libre Franklin',Georgia,serif;font-weight:500;line-height:1.05;letter-spacing:-.01em}
+  a{color:inherit}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+  .eyebrow{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--brass)}
+
+  /* ---------- header ---------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(245,241,232,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:11px;font-family:'Oswald',sans-serif;font-size:1.16rem;font-weight:700;letter-spacing:.01em;text-transform:uppercase;text-decoration:none}
+  .mark{width:34px;height:34px;flex:none;display:grid;place-items:center}
+  .mark svg{width:34px;height:34px;display:block}
+  nav.links{display:flex;gap:26px;align-items:center}
+  nav.links a{text-decoration:none;font-size:.92rem;font-weight:500;opacity:.82}
+  nav.links a:hover{opacity:1}
+  .hbtns{display:flex;gap:10px;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:.92rem;text-decoration:none;border-radius:10px;padding:11px 18px;transition:transform .12s ease, background .15s ease}
+  .btn:active{transform:translateY(1px)}
+  .btn-call{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn-call:hover{background:var(--bone-2)}
+  .btn-go{background:var(--fresh);color:#fff}
+  .btn-go:hover{background:var(--fresh-press)}
+  .menu-toggle{display:none;background:none;border:1px solid var(--line);border-radius:9px;padding:8px 10px;cursor:pointer}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 36px}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+  .hero h1{font-size:clamp(2.4rem,5vw,3.7rem)}
+  .hero h1 em{font-style:normal;color:var(--pine);position:relative;white-space:nowrap}
+  .hero p.sub{font-size:1.12rem;margin:18px 0 26px;max-width:30ch;opacity:.86}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+  .hero .btn{padding:14px 22px;font-size:1rem}
+  .reassure{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;font-size:.86rem;opacity:.78}
+  .reassure span{display:inline-flex;gap:7px;align-items:center}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--fresh)}
+
+  /* ---------- before/after slider (signature) ---------- */
+  .ba{position:relative;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);aspect-ratio:4/3;user-select:none;background:var(--ink)}
+  .ba .layer{position:absolute;inset:0;display:grid;place-items:center;font-family:'Libre Franklin',serif;color:rgba(255,255,255,.9);font-size:1.4rem}
+  .ba .after{background:
+      radial-gradient(120% 90% at 30% 20%, #34527e 0%, #21395c 55%, #152741 100%)}
+  .ba .before{background:
+      repeating-linear-gradient(45deg,#5a5147 0 14px,#4c443b 14px 28px);
+      clip-path:inset(0 50% 0 0)}
+  .ba .tag{position:absolute;top:14px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;background:rgba(0,0,0,.4);color:#fff;padding:5px 10px;border-radius:20px}
+  .ba .tag.l{left:14px}.ba .tag.r{right:14px}
+  .ba .handle{position:absolute;top:0;bottom:0;left:50%;width:2px;background:#fff;transform:translateX(-1px);cursor:ew-resize}
+  .ba .knob{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.3);color:var(--pine);font-weight:700}
+  .ba-cap{margin-top:10px;font-size:.82rem;opacity:.65;text-align:center}
+
+  /* ---------- generic section ---------- */
+  section.block{padding:62px 0}
+  .head{max-width:54ch;margin-bottom:34px}
+  .head h2{font-size:clamp(1.8rem,3.5vw,2.6rem);margin-top:10px}
+  .head p{margin-top:12px;opacity:.82}
+
+  /* ---------- trust strip ---------- */
+  .strip{background:var(--ink);color:var(--bone)}
+  .strip .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-top:26px;padding-bottom:26px}
+  .strip .item{flex:1;min-width:150px}
+  .strip .num{font-family:'Libre Franklin',serif;font-size:1.7rem;color:#fff}
+  .strip .lbl{font-size:.82rem;opacity:.7;margin-top:2px}
+
+  /* ---------- packages ---------- */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px;display:flex;flex-direction:column}
+  .card.feat{border:1.5px solid var(--pine);box-shadow:var(--shadow);position:relative}
+  .card.feat::after{content:"Most booked";position:absolute;top:-11px;right:18px;background:var(--brass);color:#fff;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:4px 10px;border-radius:20px}
+  .card h3{font-size:1.3rem}
+  .card .price{font-family:'Libre Franklin',serif;font-size:2.1rem;margin:8px 0 2px;color:var(--pine)}
+  .card .price small{font-size:.9rem;color:var(--ink);opacity:.6;font-family:'Inter'}
+  .card ul{list-style:none;margin:16px 0 22px;display:flex;flex-direction:column;gap:9px;font-size:.92rem}
+  .card li{display:flex;gap:9px;align-items:flex-start}
+  .check{color:var(--brass);font-weight:700;flex:none}
+  .card .btn{margin-top:auto;justify-content:center}
+  .pricing-note{font-size:.82rem;opacity:.6;margin-top:16px;text-align:center}
+
+  /* ---------- how ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;counter-reset:s}
+  .step{position:relative;padding-top:14px}
+  .step .n{font-family:'Libre Franklin',serif;font-size:1rem;color:var(--brass);font-weight:600;border-top:2px solid var(--brass);display:inline-block;padding-top:10px}
+  .step h3{font-size:1.2rem;margin:8px 0 6px}
+  .step p{font-size:.92rem;opacity:.82}
+
+  /* ---------- reviews ---------- */
+  .revs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .rev{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:24px}
+  .stars{color:var(--brass);letter-spacing:2px;margin-bottom:10px}
+  .rev p{font-size:.96rem}
+  .rev .who{margin-top:14px;font-size:.84rem;font-weight:600;opacity:.7}
+
+  /* ---------- quote form ---------- */
+  .quote{background:var(--pine-deep);color:var(--bone)}
+  .quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:46px;align-items:start}
+  .quote h2{color:#fff;font-size:clamp(1.9rem,3.6vw,2.7rem)}
+  .quote .lead{opacity:.85;margin:14px 0 22px}
+  .quote ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .quote ul li{display:flex;gap:10px;font-size:.96rem}
+  form{background:var(--bone);color:var(--ink);border-radius:var(--r);padding:26px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:.82rem;font-weight:600;margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;font-family:inherit;font-size:.96rem;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  .field textarea{resize:vertical;min-height:74px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  form .btn-go{width:100%;justify-content:center;padding:14px;font-size:1rem;margin-top:4px}
+  .form-alt{text-align:center;font-size:.84rem;margin-top:14px;opacity:.75}
+  .form-alt a{color:var(--pine);font-weight:600}
+  .form-ok{display:none;background:#fff;border:1px solid var(--fresh);border-radius:var(--r);padding:26px;text-align:center}
+  .form-ok h3{color:var(--pine)}
+
+  /* ---------- footer ---------- */
+  footer{background:var(--ink);color:var(--bone);padding:48px 0 30px}
+  .foot{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}
+  .foot .brand{color:var(--bone)}
+  .foot a{color:var(--bone);text-decoration:none;opacity:.8;display:block;margin:5px 0;font-size:.92rem}
+  .foot a:hover{opacity:1}
+  .foot h4{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;opacity:.55;margin-bottom:10px}
+  .copy{margin-top:34px;font-size:.8rem;opacity:.5;border-top:1px solid rgba(255,255,255,.12);padding-top:18px}
+
+  /* ---------- chat widget ---------- */
+  #chatBtn{position:fixed;bottom:22px;right:22px;z-index:60;background:var(--pine);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-family:inherit;font-weight:600;font-size:.95rem;cursor:pointer;box-shadow:var(--shadow);display:flex;gap:9px;align-items:center}
+  #chatBtn:hover{background:var(--pine-deep)}
+  #chatPanel{position:fixed;bottom:84px;right:22px;z-index:60;width:360px;max-width:calc(100vw - 32px);height:520px;max-height:calc(100vh - 120px);background:var(--bone);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.28);display:none;flex-direction:column;overflow:hidden;border:1px solid var(--line)}
+  #chatPanel.open{display:flex}
+  .chat-top{background:var(--pine);color:#fff;padding:15px 18px}
+  .chat-top b{font-family:'Libre Franklin',serif;font-weight:600}
+  .chat-top div{font-size:.78rem;opacity:.8;margin-top:2px}
+  .chat-x{position:absolute;top:12px;right:14px;background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;opacity:.85}
+  .chat-log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .msg{max-width:84%;padding:10px 13px;border-radius:14px;font-size:.92rem;line-height:1.45}
+  .msg.bot{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.me{background:var(--pine);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .chat-in{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--bone)}
+  .chat-in input{flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-family:inherit;font-size:.92rem;background:#fff}
+  .chat-in button{background:var(--fresh);color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:600;cursor:pointer}
+  .typing{font-size:.85rem;opacity:.6;font-style:italic}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:880px){
+    nav.links{display:none}
+    .menu-toggle{display:inline-block}
+    .hero-grid,.quote-grid{grid-template-columns:1fr;gap:30px}
+    .hero p.sub{max-width:none}
+    .cards,.steps,.revs{grid-template-columns:1fr}
+    .hbtns .btn-call{display:none}
+    nav.mobile{display:none;flex-direction:column;padding:10px 0 16px;border-top:1px solid var(--line)}
+    nav.mobile.open{display:flex}
+    nav.mobile a{padding:11px 0;text-decoration:none;font-weight:500}
+  }
+  @media(min-width:881px){nav.mobile{display:none}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a href="#" class="brand"><span class="mark"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="9" fill="#21395c"/><circle cx="20" cy="20" r="13" fill="#f4efe3"/><rect x="18" y="13" width="4" height="14" rx="2" fill="#21395c"/><polygon points="14,27 26,27 28,32 12,32" fill="#21395c"/><polygon points="28,11.5 29.6,15.6 33.5,17.2 29.6,18.8 28,22.9 26.4,18.8 22.5,17.2 26.4,15.6" fill="#b98a3c"/></svg></span>Heritage Carpet Care</a>
+    <nav class="links">
+      <a href="#services">Services</a>
+      <a href="#proof">Results</a>
+      <a href="#how">How it works</a>
+      <a href="#reviews">Reviews</a>
+    </nav>
+    <div class="hbtns">
+      <!-- EDIT: phone number -->
+      <a class="btn btn-call" href="tel:+13125550199">Call</a>
+      <a class="btn btn-go" href="#quote">Get a quote</a>
+      <button class="menu-toggle" aria-label="Menu" onclick="document.querySelector('nav.mobile').classList.toggle('open')">☰</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <nav class="mobile">
+      <a href="#services">Services</a>
+      <a href="#proof">Results</a>
+      <a href="#how">How it works</a>
+      <a href="#reviews">Reviews</a>
+      <a href="tel:+13125550199">Call (312) 555-0199</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Chicago's West Suburbs</span>
+      <h1>Carpets that look <em>new again</em>, dry by dinner.</h1>
+      <p class="sub">Deep hot-water extraction for homes that expect a real result. Booked this week, not next month.</p>
+      <div class="hero-cta">
+        <a class="btn btn-go" href="#quote">Get my quote</a>
+        <!-- EDIT: phone number -->
+        <a class="btn btn-call" href="tel:+13125550199">Call (312) 555-0199</a>
+      </div>
+      <div class="reassure">
+        <span><i class="dot"></i> Fully insured</span>
+        <span><i class="dot"></i> Same-week appointments</span>
+        <span><i class="dot"></i> Pet &amp; kid safe</span>
+      </div>
+    </div>
+    <div>
+      <div class="ba" id="ba">
+        <div class="layer after"><span>After</span></div>
+        <div class="layer before" id="baBefore"><span>Before</span></div>
+        <span class="tag l">Before</span><span class="tag r">After</span>
+        <div class="handle" id="baHandle"><div class="knob">⇄</div></div>
+      </div>
+      <p class="ba-cap">Drag to reveal. Replace with your own before/after photos once you have them.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST STRIP -->
+<div class="strip">
+  <div class="wrap">
+    <div class="item"><div class="num">2&ndash;4 hrs</div><div class="lbl">Typical dry time</div></div>
+    <div class="item"><div class="num">$0</div><div class="lbl">Quotes, always free</div></div>
+    <div class="item"><div class="num">Insured</div><div class="lbl">$1M liability coverage</div></div>
+    <div class="item"><div class="num">Local</div><div class="lbl">DuPage owner-operated</div></div>
+  </div>
+</div>
+
+<!-- SERVICES / PACKAGES -->
+<section class="block" id="services">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Pricing</span>
+      <h2>Clear packages, no surprise fees.</h2>
+      <p>Prices reflect typical west-suburban home sizes. Final quote confirmed before any work starts.</p>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <h3>Refresh</h3>
+        <div class="price">$179<small> / up to 3 rooms</small></div>
+        <ul>
+          <li><span class="check">✓</span> 3 carpeted rooms</li>
+          <li><span class="check">✓</span> Pre-spray + hot-water extraction</li>
+          <li><span class="check">✓</span> Spot treatment included</li>
+          <li><span class="check">✓</span> Deodorizer included</li>
+        </ul>
+        <a class="btn btn-call" href="#quote">Book Refresh</a>
+      </div>
+      <div class="card feat">
+        <h3>Whole Home</h3>
+        <div class="price">$349<small> / up to 7 areas</small></div>
+        <ul>
+          <li><span class="check">✓</span> Up to 7 rooms or areas</li>
+          <li><span class="check">✓</span> Stairs &amp; hallway included</li>
+          <li><span class="check">✓</span> Pet odor neutralizer</li>
+          <li><span class="check">✓</span> Stain-guard on high-traffic lanes</li>
+        </ul>
+        <a class="btn btn-go" href="#quote">Book Whole Home</a>
+      </div>
+      <div class="card">
+        <h3>Rugs &amp; Stairs</h3>
+        <div class="price">$99<small> + per piece</small></div>
+        <ul>
+          <li><span class="check">✓</span> Area &amp; oriental rugs</li>
+          <li><span class="check">✓</span> Staircases priced per flight</li>
+          <li><span class="check">✓</span> Upholstery add-on available</li>
+          <li><span class="check">✓</span> Pickup &amp; drop-off for rugs</li>
+        </ul>
+        <a class="btn btn-call" href="#quote">Get rug quote</a>
+      </div>
+    </div>
+    <p class="pricing-note">$149 minimum service charge. Stairs $3/step. Pet treatment $40/area. Wool &amp; specialty rugs quoted on site.</p>
+  </div>
+</section>
+
+<!-- BEFORE/AFTER PROOF -->
+<section class="block" id="proof" style="background:var(--bone-2)">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">Real results</span>
+      <h2>The difference shows up the moment we leave.</h2>
+      <p>Swap these tiles for your own job photos. Before/after shots are the single best thing you can post on Nextdoor and Google.</p>
+    </div>
+    <div class="cards">
+      <div class="card" style="aspect-ratio:1;background:linear-gradient(135deg,#34527e,#152741);color:#fff;display:grid;place-items:center;font-family:'Libre Franklin',serif;border:none">Your photo 1</div>
+      <div class="card" style="aspect-ratio:1;background:linear-gradient(135deg,#34527e,#152741);color:#fff;display:grid;place-items:center;font-family:'Libre Franklin',serif;border:none">Your photo 2</div>
+      <div class="card" style="aspect-ratio:1;background:linear-gradient(135deg,#34527e,#152741);color:#fff;display:grid;place-items:center;font-family:'Libre Franklin',serif;border:none">Your photo 3</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="block" id="how">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">How it works</span>
+      <h2>From quote to clean carpet in three steps.</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="n">Step one</span><h3>Send the details</h3><p>Tell us the rooms and any problem spots through the form, a text, or the chat. You get a quote back fast.</p></div>
+      <div class="step"><span class="n">Step two</span><h3>We confirm a time</h3><p>Pick a slot this week. We arrive on time with the truck-grade extractor and everything we need.</p></div>
+      <div class="step"><span class="n">Step three</span><h3>Walk on it tonight</h3><p>Pre-spray, deep extract, groom. Carpets are damp, not soaked, and dry within a few hours.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="block" id="reviews" style="background:var(--bone-2)">
+  <div class="wrap">
+    <div class="head">
+      <span class="eyebrow">What neighbors say</span>
+      <h2>Trusted on streets across the west suburbs.</h2>
+      <p>Replace these with real Google reviews as they come in. Three real ones beat thirty fake ones.</p>
+    </div>
+    <div class="revs">
+      <div class="rev"><div class="stars">★★★★★</div><p>"Booked Tuesday, cleaned Thursday. The traffic lanes in our family room look brand new. Dry before the kids got home."</p><div class="who">— Sample, Hinsdale</div></div>
+      <div class="rev"><div class="stars">★★★★★</div><p>"On time, careful with the baseboards, and the pet smell in the basement is gone. Already booked the stairs for next month."</p><div class="who">— Sample, Oak Brook</div></div>
+      <div class="rev"><div class="stars">★★★★★</div><p>"Fair price, no upsell games. Texted me a quote in ten minutes. This is who we use now."</p><div class="who">— Sample, Glen Ellyn</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE FORM -->
+<section class="block quote" id="quote">
+  <div class="wrap quote-grid">
+    <div>
+      <span class="eyebrow" style="color:#d8b870">Free quote</span>
+      <h2>Tell us about your floors.</h2>
+      <p class="lead">Most quotes come back within the hour during business hours. The more detail you give, the tighter the price.</p>
+      <ul>
+        <li><span class="check">✓</span> No charge to quote, no obligation</li>
+        <li><span class="check">✓</span> Same-week appointments available</li>
+        <li><span class="check">✓</span> Prefer to talk? Call or text (312) 555-0199</li>
+      </ul>
+    </div>
+    <div>
+      <form id="quoteForm">
+        <!-- EDIT: paste your free Web3Forms access key (web3forms.com) -->
+        <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_KEY">
+        <input type="hidden" name="subject" value="New carpet quote request">
+        <div class="row2">
+          <div class="field"><label>Name</label><input name="name" required placeholder="Jane Smith"></div>
+          <div class="field"><label>Phone</label><input name="phone" required placeholder="(630) 555-0123"></div>
+        </div>
+        <div class="field"><label>Address or town</label><input name="address" required placeholder="Hinsdale, IL"></div>
+        <div class="row2">
+          <div class="field"><label>What needs cleaning?</label>
+            <select name="service">
+              <option>3 rooms or fewer</option>
+              <option>Whole home (4-7 areas)</option>
+              <option>Stairs only</option>
+              <option>Area rug(s)</option>
+              <option>Upholstery</option>
+              <option>Pet odor / stains</option>
+            </select>
+          </div>
+          <div class="field"><label>When?</label>
+            <select name="timing">
+              <option>This Monday or Tuesday (soonest)</option>
+              <option>This Wednesday or Thursday</option>
+              <option>Next week</option>
+              <option>Just getting a price</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Anything we should know?</label><textarea name="notes" placeholder="Two cats, red wine stain in the dining room, etc."></textarea></div>
+        <button type="submit" class="btn btn-go">Send for my quote</button>
+        <p class="form-alt">Rather not fill a form? <a href="sms:+13125550199">Text us</a> or <a href="tel:+13125550199">call</a>.</p>
+      </form>
+      <div class="form-ok" id="formOk">
+        <h3>Got it. Talk soon.</h3>
+        <p style="margin-top:8px;opacity:.8">We'll text you a quote shortly. For anything urgent, call (312) 555-0199.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap foot">
+    <div style="max-width:30ch">
+      <a href="#" class="brand"><span class="mark"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="9" fill="#21395c"/><circle cx="20" cy="20" r="13" fill="#f4efe3"/><rect x="18" y="13" width="4" height="14" rx="2" fill="#21395c"/><polygon points="14,27 26,27 28,32 12,32" fill="#21395c"/><polygon points="28,11.5 29.6,15.6 33.5,17.2 29.6,18.8 28,22.9 26.4,18.8 22.5,17.2 26.4,15.6" fill="#b98a3c"/></svg></span>Heritage Carpet Care</a>
+      <p style="opacity:.7;font-size:.9rem;margin-top:12px">Premium carpet, rug, and upholstery cleaning across Chicago's affluent west suburbs.</p>
+    </div>
+    <div>
+      <h4>Service area</h4>
+      <span style="opacity:.8;font-size:.92rem">Hinsdale · Oak Brook · Glen Ellyn · Clarendon Hills · Burr Ridge · Western Springs · Wheaton · Naperville · Downers Grove</span>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <a href="tel:+13125550199">(312) 555-0199</a>
+      <a href="sms:+13125550199">Text us</a>
+      <a href="#quote">Get a quote</a>
+    </div>
+    <div>
+      <h4>Hours</h4>
+      <span style="opacity:.8;font-size:.92rem">Mon&ndash;Thu, 8am&ndash;7pm<br>Mon &amp; Tue slots fill first</span>
+    </div>
+  </div>
+  <div class="wrap copy">© <span id="yr"></span> Heritage Carpet Care · Insured · Serving Chicago's west suburbs</div>
+</footer>
+
+<!-- CHAT WIDGET -->
+<button id="chatBtn" onclick="toggleChat()">💬 Ask a question</button>
+<div id="chatPanel">
+  <div class="chat-top">
+    <button class="chat-x" onclick="toggleChat()">×</button>
+    <b>Heritage Carpet Care</b>
+    <div>Quotes, booking, and questions</div>
+  </div>
+  <div class="chat-log" id="chatLog"></div>
+  <div class="chat-in">
+    <input id="chatInput" placeholder="e.g. how much for 4 rooms?" onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  /* =====================================================================
+     n8n INTEGRATION  -  paste your n8n Webhook node URLs here.
+     Leave a value as '' to fall back to the built-in behavior.
+     Full workflow recipes + payload schemas are in n8n-setup.md
+     ===================================================================== */
+  const N8N = {
+    leadWebhook: '',   // POST  -> receives every form lead. e.g. https://YOUR-n8n/webhook/lead
+    chatWebhook: '',   // POST  -> AI receptionist. Gets {system,messages,sessionId}, returns {reply}
+  };
+  const CHAT_ENDPOINT = 'https://api.anthropic.com/v1/messages'; // used only when chatWebhook is empty (Claude preview)
+  const PHONE = '(312) 555-0199';                                 // EDIT: your number (also update the tel: links above)
+  const sessionId = 'web_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+  // Send a structured lead to n8n. Safe no-op (console log) if not configured yet.
+  async function postLead(payload){
+    payload = Object.assign({ event:'lead.created', source:'website', status:'new', timestamp:new Date().toISOString(), sessionId }, payload);
+    if(!N8N.leadWebhook){ console.log('[lead -> would POST to n8n]', payload); return false; }
+    try{
+      const r = await fetch(N8N.leadWebhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      return r.ok;
+    }catch(e){ console.warn('lead webhook failed', e); return false; }
+  }
+
+  /* ----- before/after slider ----- */
+  (function(){
+    const ba=document.getElementById('ba'), before=document.getElementById('baBefore'), handle=document.getElementById('baHandle');
+    let drag=false;
+    function set(x){
+      const r=ba.getBoundingClientRect();
+      let p=(x-r.left)/r.width; p=Math.max(0,Math.min(1,p));
+      before.style.clipPath='inset(0 '+((1-p)*100)+'% 0 0)';
+      handle.style.left=(p*100)+'%';
+    }
+    const start=()=>drag=true, end=()=>drag=false;
+    handle.addEventListener('mousedown',start); window.addEventListener('mouseup',end);
+    window.addEventListener('mousemove',e=>{if(drag)set(e.clientX)});
+    handle.addEventListener('touchstart',start,{passive:true});
+    window.addEventListener('touchend',end);
+    window.addEventListener('touchmove',e=>{if(drag)set(e.touches[0].clientX)},{passive:true});
+    ba.addEventListener('click',e=>set(e.clientX));
+  })();
+
+  /* ----- quote form (Web3Forms) ----- */
+  document.getElementById('quoteForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn=this.querySelector('button[type=submit]'); btn.textContent='Sending...'; btn.disabled=true;
+    try{
+      const res=await fetch('https://api.web3forms.com/submit',{
+        method:'POST',headers:{'Accept':'application/json'},body:new FormData(this)
+      });
+      if(res.ok){ this.style.display='none'; document.getElementById('formOk').style.display='block'; }
+      else throw new Error();
+    }catch(err){
+      btn.textContent='Send for my quote'; btn.disabled=false;
+      alert('Something went wrong. Please text or call (312) 555-0199 and we will sort it out.');
+    }
+  });
+
+  /* ----- AI chat widget -----
+     In the Claude artifact preview this calls the Anthropic API directly and works as a live demo.
+     WHEN YOU DEPLOY: browsers cannot safely hold an API key, so point CHAT_ENDPOINT at your own
+     tiny serverless function (Cloudflare Worker / Vercel function) that adds the key and forwards
+     to api.anthropic.com. Swap the fetch URL below for your endpoint and you are done.
+  */
+  const SYSTEM_PROMPT = `You are the friendly virtual assistant for Heritage Carpet Care, a premium carpet, rug, and upholstery cleaning company serving the affluent west suburbs of Chicago: Hinsdale, Oak Brook, Glen Ellyn, Clarendon Hills, Burr Ridge, Western Springs, Wheaton, Naperville, and Downers Grove. (We do not currently serve Elmhurst.)
+Goals, in order: 1) answer questions clearly and briefly, 2) give ballpark pricing, 3) capture the lead (name, phone, address/town, what needs cleaning) and tell them the owner will text a firm quote.
+Pricing guide: Refresh up to 3 rooms $179. Whole Home up to 7 areas $349. Rugs from $99. Stairs $3/step. Pet treatment $40/area. $149 minimum. Final quote confirmed before work.
+Dry time is 2-4 hours. Hot-water extraction, pet and kid safe, fully insured.
+Scheduling: we book Monday through Thursday only. When scheduling comes up, offer Monday or Tuesday first to keep the week tight, then Wednesday or Thursday if those are full. Never offer Friday, Saturday, or Sunday.
+Keep replies to 2-4 sentences. Never invent exact appointment times; say the owner confirms the slot. If they share contact details, thank them and say the owner will text a firm quote and a Monday or Tuesday time shortly.`;
+
+  const CHAT_ENDPOINT = 'https://api.anthropic.com/v1/messages'; // see deploy note above
+  let history = [];
+  let chatUserClosed = false;
+
+  function openChat(){
+    const p=document.getElementById('chatPanel'); p.classList.add('open');
+    document.getElementById('chatBtn').style.display='none';
+    if(history.length===0){
+      addMsg('bot',"Hi! Tell me what needs cleaning and I can give you a ballpark and get you booked in. What rooms are we talking about?");
+    }
+    document.getElementById('chatInput').focus();
+  }
+  function closeChat(){
+    document.getElementById('chatPanel').classList.remove('open');
+    document.getElementById('chatBtn').style.display='flex';
+    chatUserClosed=true;   // don't auto-pop again once they've closed it
+  }
+  function toggleChat(){
+    const p=document.getElementById('chatPanel');
+    if(p.classList.contains('open')) closeChat(); else openChat();
+  }
+  // Open by itself shortly after the page loads. Skip on phones, where it would
+  // cover the whole screen before the visitor sees anything. They can still tap the button.
+  window.addEventListener('load',()=>{
+    if(window.innerWidth > 600 && !chatUserClosed){ setTimeout(openChat, 700); }
+  });
+  function addMsg(who,text){
+    const log=document.getElementById('chatLog');
+    const d=document.createElement('div'); d.className='msg '+who; d.textContent=text; log.appendChild(d); log.scrollTop=log.scrollHeight; return d;
+  }
+  async function sendChat(){
+    const inp=document.getElementById('chatInput'); const text=inp.value.trim(); if(!text)return;
+    addMsg('me',text); inp.value=''; history.push({role:'user',content:text});
+    const t=addMsg('bot','...'); t.classList.add('typing');
+    try{
+      const res=await fetch(CHAT_ENDPOINT,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:SYSTEM_PROMPT,messages:history})
+      });
+      const data=await res.json();
+      const reply=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim()
+        || "Easiest is to text us at (312) 555-0199 and we'll get you a quote fast.";
+      t.classList.remove('typing'); t.textContent=reply; history.push({role:'assistant',content:reply});
+    }catch(err){
+      t.classList.remove('typing');
+      t.textContent="I'm having trouble connecting. Please text or call (312) 555-0199 and we'll help right away.";
+    }
+  }
+</script>
+</body>
+</html>

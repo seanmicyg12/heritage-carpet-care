@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 230" width="760" height="230" role="img" aria-label="Heritage Carpet Care">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&amp;display=swap');
+      .word { font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.01em; }
+      .sub  { font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.05em; }
+      .tag  { font-family:'Oswald',sans-serif; font-weight:500; letter-spacing:.15em; }
+    </style>
+  </defs>
+
+  <!-- ===== BADGE ===== -->
+  <g transform="translate(0,-6)">
+    <circle cx="120" cy="118" r="100" fill="#21395c"/>
+    <circle cx="120" cy="118" r="92" fill="none" stroke="#b98a3c" stroke-width="3"/>
+    <circle cx="120" cy="118" r="75" fill="#f4efe3"/>
+
+    <polygon points="120,26 123,36 133,36 125,43 128,53 120,46 112,53 115,43 107,36 117,36" fill="#f4efe3"/>
+    <polygon points="78,36 80,43 88,43 82,48 84,56 78,51 72,56 74,48 68,43 76,43" fill="#b98a3c"/>
+    <polygon points="162,36 164,43 172,43 166,48 168,56 162,51 156,56 158,48 152,43 160,43" fill="#b98a3c"/>
+
+    <path d="M120 74 C120 58 101 52 90 61" fill="none" stroke="#21395c" stroke-width="10" stroke-linecap="round"/>
+    <rect x="113" y="72" width="14" height="70" rx="6" fill="#21395c"/>
+    <circle cx="120" cy="102" r="5" fill="#9c3b2c"/>
+    <polygon points="97,142 143,142 152,170 88,170" fill="#21395c"/>
+    <rect x="97" y="162" width="46" height="7" rx="2" fill="#f4efe3"/>
+    <polygon points="160,78 164,89 175,93 164,97 160,108 156,97 145,93 156,89" fill="#b98a3c"/>
+    <circle cx="108" cy="181" r="3.2" fill="#21395c"/>
+    <circle cx="131" cy="183" r="2.8" fill="#21395c"/>
+  </g>
+
+  <!-- ===== WORDMARK ===== -->
+  <text x="262" y="100" class="word" font-size="74" fill="#21395c">HERITAGE</text>
+  <text x="264" y="152" class="sub"  font-size="44" fill="#21395c">CARPET <tspan fill="#9c3b2c">CARE</tspan></text>
+
+  <rect x="264" y="176" width="16" height="4" fill="#9c3b2c"/>
+  <rect x="284" y="176" width="16" height="4" fill="#b98a3c"/>
+  <text x="311" y="183" class="tag" font-size="16" fill="#21395c">CLEAN CARPETS. HAPPY HOME.</text>
+</svg>
